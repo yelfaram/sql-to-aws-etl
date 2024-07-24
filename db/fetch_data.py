@@ -21,7 +21,7 @@ if not table_name:
 
 # Configure logging
 logging.basicConfig(
-    filename='db/fetch_data.log', 
+    filename='logs/fetch_data.log', 
     level=logging.INFO, 
     format='%(asctime)s - %(levelname)s - %(message)s',
     filemode='w'
@@ -45,13 +45,13 @@ except Exception as e:
 print(dataframe.head())
 
 try:
-    # ensure db directory exists then save csv file to it
-    if not os.path.exists('db'):
-        os.makedirs('db')
-        logging.info("Created 'db' directory.")
+    # ensure data directory exists then save csv file to it
+    if not os.path.exists('data'):
+        os.makedirs('data')
+        logging.info("Created 'data' directory.")
 
     # save dataframe to a CSV file
-    dataframe.to_csv('db/fetched_data.csv')
+    dataframe.to_csv('data/fetched_data.csv')
 
     logging.info("Data saved to CSV successfully.")
 except Exception as e:

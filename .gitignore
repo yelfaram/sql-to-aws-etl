@@ -1,6 +1,6 @@
 venv/
+logs/
+data/
 .env
 __pycache__/
 *.pyc
-db/fetch_data.log
-db/fetched_data.csv
