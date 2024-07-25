@@ -19,11 +19,13 @@ if not table_name:
     raise ValueError("TABLE_NAME not found in environment variables")
 
 # Configure logging
-logging.basicConfig(
-    filename='logs/fetch_data.log', 
+logging.basicConfig( 
     level=logging.INFO, 
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filemode='w'
+    handlers=[
+        logging.FileHandler('logs/fetch_data.log', mode='w'),
+        logging.StreamHandler()
+    ]
 )
 
 logging.info("Starting data fetch process...")

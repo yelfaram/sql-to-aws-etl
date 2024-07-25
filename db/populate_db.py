@@ -2,16 +2,17 @@ import numpy as np
 import pandas as pd
 import logging
 
-
 from dotenv import load_dotenv
 load_dotenv()
 
 # Configure logging
 logging.basicConfig(
-    filename='logs/populate_db.log',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filemode='w'
+    handlers=[
+        logging.FileHandler('logs/populate_db.log', mode='w'),
+        logging.StreamHandler()
+    ]
 )
 
 logging.info("Starting db population process...")

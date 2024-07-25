@@ -1,13 +1,15 @@
 from psycopg2 import connect
-from db_config import *
+from db.db_config import *
 import logging
 
 # Configure logging
 logging.basicConfig(
-    filename='logs/connection.py',
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    filemode='w'
+    handlers=[
+        logging.FileHandler('logs/connection.py', mode='w'),
+        logging.StreamHandler()
+    ]
 )
 
 # Connect to database
