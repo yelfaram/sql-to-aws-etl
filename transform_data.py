@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 import logging
+import time
 
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderTimedOut
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -41,9 +44,10 @@ def custom_title_cases(s: str) -> str:
 def handle_negative_and_missing_values(df: pd.DataFrame) -> pd.DataFrame:
     logging.info("Handling negative and missing values...")
 
-    df = df[df['cases'] >= 0]                                       # ensure no negative values in 'cases' column
-    df.fillna({'cases': 0, 'difference': 0}, inplace=True)          # handle missing values in 'cases' and 'difference' column
-    df['admin2'].replace('Unassigned', np.nan, inplace=True)        # change 'Unassigned" to NaN in 'admin2' column
+    df = df[df['cases'] >= 0]                                                           # ensure no negative values in 'cases' column
+    df.fillna({'cases': 0, 'difference': 0}, inplace=True)                              # handle missing values in 'cases' and 'difference' column
+    df['admin2'].replace('Unassigned', np.nan, inplace=True)                            # change 'Unassigned" to NaN in 'admin2' column
+    df.loc[df['admin2'].str.startswith('Out of', na=False), 'admin2'] = np.nan          # change 'Out of ...' entries to NaN in 'admin2' column
     
     return df
 
@@ -59,6 +63,23 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
+def handle_missing_geo_point_values(df: pd.DataFrame) -> pd.DataFrame:
+    logging.info("Handling missing geo point coordinates... This process may take 2-3 minutes to complete.")   
+
+    geolocator = Nominatim(user_agent="sql_to_aws_etl", timeout=10)
+
+    for index, row in df.iterrows():
+        if row['location'] == "(0,0)":
+            try:
+                location = geolocator.geocode(row['combined_key'])
+                if location:
+                    df.at[index, 'location'] = f"({location.latitude}, {location.longitude})"
+            except GeocoderTimedOut:
+                time.sleep(1) # wait a bit before retrying
+    
+    return df
+
+
 def validate_and_clean_data(df: pd.DataFrame) -> pd.DataFrame:
     # remove duplicate rows
     df = df.drop_duplicates()                                                                                                   
@@ -70,7 +91,11 @@ def validate_and_clean_data(df: pd.DataFrame) -> pd.DataFrame:
 
     # normalize data                                                                               
     df = normalize_data(df)
-    logging.info("Normalizing data columns... COMPLETE")                                                                                                     
+    logging.info("Normalizing data columns... COMPLETE") 
+
+    # handle missing geo point values
+    df = handle_missing_geo_point_values(df)
+    logging.info("Handling missing geo point coordinates... COMPLETE")                                                                                                    
 
     # remove repetitive columns
     df.drop(columns=['country_region', 'province_state', 'admin2', 'lat', 'long', 'prep_flow_runtime'], inplace=True)           
