@@ -57,7 +57,7 @@ The project was divided into four sprints:
 
 ## Configuration
 
-Create a `.env` file in the project root with the following content:
+1. Create a `.env` file in the project root with the following content:
     ```
     DW_AUTH_TOKEN=your_data_world_token
     DATASET_KEY="zathompson/covid-19-case-counts-test"
@@ -75,7 +75,7 @@ Create a `.env` file in the project root with the following content:
 
 ## Usage
 
-Run the `main.py` script to execute the full ETL process:
+1. Run the `main.py` script to execute the full ETL process:
     ```bash
     python main.py
     ```
